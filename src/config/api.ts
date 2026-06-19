@@ -1,3 +1,5 @@
+import { API_URL } from '@env';
+
 // API Configuration
 export const API_CONFIG = {
     // Development URL - Change this to your backend URL
@@ -7,7 +9,7 @@ export const API_CONFIG = {
     //   - Linux: ip addr show | grep "inet " | grep -v 127.0.0.1
     //   - Windows: ipconfig (look for IPv4 Address)
     //   - Mac: ifconfig | grep "inet " | grep -v 127.0.0.1
-    BASE_URL: __DEV__ ? 'http://localhost:5000' : 'https://your-production-url.com',
+    BASE_URL: API_URL || 'http://54.225.20.131',
 
     // API Endpoints
     ENDPOINTS: {

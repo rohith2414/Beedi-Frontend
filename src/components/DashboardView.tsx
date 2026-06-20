@@ -5,6 +5,7 @@ import {
     TouchableOpacity,
     StyleSheet,
     ScrollView,
+    Alert,
 } from 'react-native';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -21,10 +22,35 @@ const DashboardView: React.FC<DashboardViewProps> = ({
     onNavigate,
 }) => {
     const { language, setLanguage, t } = useLanguage();
-    const { subscription } = useAuth();
+    const { subscription, logout } = useAuth();
 
     const toggleLanguage = () => {
         setLanguage(language === 'en' ? 'te' : 'en');
+    };
+
+    const handleLogout = () => {
+        Alert.alert(
+            language === 'en' ? 'Logout' : 'లాగ్ అవుట్',
+            language === 'en' ? 'Are you sure you want to logout?' : 'మీరు ఖచ్చితంగా లాగ్ అవుట్ చేయాలనుకుంటున్నారా?',
+            [
+                {
+                    text: language === 'en' ? 'Cancel' : 'రద్దు చేయి',
+                    style: 'cancel',
+                },
+                {
+                    text: language === 'en' ? 'Logout' : 'లాగ్ అవుట్',
+                    onPress: async () => {
+                        try {
+                            await logout();
+                        } catch (error) {
+                            console.error('Logout error:', error);
+                            Alert.alert('Error', 'Failed to logout');
+                        }
+                    },
+                    style: 'destructive',
+                },
+            ]
+        );
     };
 
     const showTrialBanner = 
@@ -58,6 +84,12 @@ const DashboardView: React.FC<DashboardViewProps> = ({
                                 <Text style={styles.languageButtonText}>
                                     {language === 'en' ? 'తెలుగు' : 'English'}
                                 </Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={styles.logoutButton}
+                                onPress={handleLogout}
+                            >
+                                <Text style={styles.logoutButtonText}>🚪</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -190,6 +222,18 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 13,
         fontWeight: '600',
+    },
+    logoutButton: {
+        backgroundColor: '#fef2f2',
+        paddingHorizontal: 10,
+        paddingVertical: 6,
+        borderRadius: 8,
+        marginLeft: 8,
+        borderColor: '#fee2e2',
+        borderWidth: 1,
+    },
+    logoutButtonText: {
+        fontSize: 16,
     },
     trialBanner: {
         backgroundColor: '#fffbeb',

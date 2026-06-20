@@ -9,6 +9,7 @@ import {
     Linking,
 } from 'react-native';
 import { Worker, Branch } from '../types';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface WorkersViewProps {
     workers: Worker[];
@@ -29,6 +30,7 @@ const WorkersView: React.FC<WorkersViewProps> = ({
     onCreateWorker,
     onEditWorker,
 }) => {
+    const { t, language } = useLanguage();
     const [searchQuery, setSearchQuery] = useState('');
 
     const filteredWorkers = selectedBranch
@@ -49,28 +51,30 @@ const WorkersView: React.FC<WorkersViewProps> = ({
                     style={styles.backButton}
                     onPress={onBack}
                 >
-                    <Text style={styles.backButtonText}>← Back to Branches</Text>
+                    <Text style={styles.backButtonText}>{t.nav.backToBranches}</Text>
                 </TouchableOpacity>
 
                 <View style={styles.headerRow}>
-                    <Text style={styles.headerTitle}>{selectedBranch?.name || 'All Workers'}</Text>
+                    <Text style={styles.headerTitle}>{selectedBranch?.name || t.workers.allWorkers}</Text>
                     {selectedBranch && (
                         <TouchableOpacity
                             style={styles.createButton}
                             onPress={onCreateWorker}
                         >
-                            <Text style={styles.createButtonText}>+ Add</Text>
+                            <Text style={styles.createButtonText}>{t.workers.add}</Text>
                         </TouchableOpacity>
                     )}
                 </View>
 
                 {selectedBranch && (
-                    <Text style={styles.subtitle}>P:₹{selectedBranch.permanentRate} C:₹{selectedBranch.contractRate}/1000</Text>
+                    <Text style={styles.subtitle}>
+                        {language === 'en' ? 'P' : 'శా'}:₹{selectedBranch.permanentRate} {language === 'en' ? 'C' : 'కా'}:₹{selectedBranch.contractRate}/1000
+                    </Text>
                 )}
 
                 <TextInput
                     style={styles.searchInput}
-                    placeholder="Search by name or serial number..."
+                    placeholder={t.workers.searchPlaceholder}
                     value={searchQuery}
                     onChangeText={setSearchQuery}
                 />
@@ -81,7 +85,7 @@ const WorkersView: React.FC<WorkersViewProps> = ({
                 contentContainerStyle={styles.scrollContentContainer}
             >
                 {filteredWorkers.length === 0 ? (
-                    <Text style={styles.emptyText}>No workers found</Text>
+                    <Text style={styles.emptyText}>{t.workers.noWorkersFound}</Text>
                 ) : (
                     filteredWorkers.map(worker => (
                         <TouchableOpacity
@@ -97,13 +101,17 @@ const WorkersView: React.FC<WorkersViewProps> = ({
                                         </View>
                                         <Text style={styles.workerName}>{worker.name}</Text>
                                         <View style={[styles.typeBadge, worker.employeeType === 'PERMANENT' ? styles.typeBadgePermanent : styles.typeBadgeContract]}>
-                                            <Text style={styles.typeBadgeText}>{worker.employeeType === 'PERMANENT' ? 'P' : 'C'}</Text>
+                                            <Text style={styles.typeBadgeText}>
+                                                {worker.employeeType === 'PERMANENT'
+                                                    ? (language === 'en' ? 'P' : 'శా')
+                                                    : (language === 'en' ? 'C' : 'కా')}
+                                            </Text>
                                         </View>
                                     </View>
                                     <Text style={styles.phoneText}>{worker.phone}</Text>
                                     {!selectedBranch && (
                                         <Text style={styles.workerBranchName}>
-                                            📍 {branches.find(b => b.id === worker.branchId)?.name || 'Unknown Branch'}
+                                            📍 {branches.find(b => b.id === worker.branchId)?.name || (language === 'en' ? 'Unknown Branch' : 'తెలియని শাখা')}
                                         </Text>
                                     )}
                                 </View>

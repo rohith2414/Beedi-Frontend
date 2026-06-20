@@ -11,6 +11,7 @@ import {
 import workerService from '../services/worker.service';
 import { useData } from '../contexts/DataContext';
 import ErrorMessage from './ErrorMessage';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface CreateWorkerModalProps {
     visible: boolean;
@@ -25,6 +26,7 @@ const CreateWorkerModal: React.FC<CreateWorkerModalProps> = ({
     onClose,
     onCreate,
 }) => {
+    const { t, language } = useLanguage();
     const [workerName, setWorkerName] = useState('');
     const [serialNo, setSerialNo] = useState('');
     const [phone, setPhone] = useState('');
@@ -64,12 +66,12 @@ const CreateWorkerModal: React.FC<CreateWorkerModalProps> = ({
                 setWorkerType('permanent');
                 onClose();
             } catch (err: any) {
-                setError(err.message || 'Failed to create worker');
+                setError(err.message || (language === 'en' ? 'Failed to create worker' : 'కార్మికుడిని చేర్చడం విఫలమైంది'));
             } finally {
                 setLoading(false);
             }
         } else {
-            setError('Please fill in all fields');
+            setError(language === 'en' ? 'Please fill in all fields' : 'దయచేసి అన్ని వివరాలను పూరించండి');
         }
     };
 
@@ -85,20 +87,22 @@ const CreateWorkerModal: React.FC<CreateWorkerModalProps> = ({
         <Modal visible={visible} transparent animationType="fade">
             <View style={styles.modalOverlay}>
                 <View style={styles.modalContent}>
-                    <Text style={styles.modalTitle}>Add New Worker</Text>
+                    <Text style={styles.modalTitle}>
+                        {language === 'en' ? 'Add New Worker' : 'కొత్త కార్మికుడిని చేర్చండి'}
+                    </Text>
 
                     {error && <ErrorMessage message={error} onDismiss={() => setError(null)} />}
 
-                    <Text style={styles.label}>Worker Name</Text>
+                    <Text style={styles.label}>{language === 'en' ? 'Worker Name' : 'కార్మికుడి పేరు'}</Text>
                     <TextInput
                         style={styles.input}
-                        placeholder="Enter worker name"
+                        placeholder={language === 'en' ? 'Enter worker name' : 'కార్మికుడి పేరు నమోదు చేయండి'}
                         value={workerName}
                         onChangeText={setWorkerName}
                         editable={!loading}
                     />
 
-                    <Text style={styles.label}>Serial Number</Text>
+                    <Text style={styles.label}>{language === 'en' ? 'Serial Number' : 'క్రమ సంఖ్య'}</Text>
                     <TextInput
                         style={styles.input}
                         placeholder="e.g., W001"
@@ -107,17 +111,17 @@ const CreateWorkerModal: React.FC<CreateWorkerModalProps> = ({
                         editable={!loading}
                     />
 
-                    <Text style={styles.label}>Phone Number</Text>
+                    <Text style={styles.label}>{language === 'en' ? 'Phone Number' : 'ఫోన్ నంబర్'}</Text>
                     <TextInput
                         style={styles.input}
-                        placeholder="Enter phone number"
+                        placeholder={language === 'en' ? 'Enter phone number' : 'ఫోన్ నంబర్ నమోదు చేయండి'}
                         value={phone}
                         onChangeText={setPhone}
                         keyboardType="phone-pad"
                         editable={!loading}
                     />
 
-                    <Text style={styles.label}>Employee Type</Text>
+                    <Text style={styles.label}>{language === 'en' ? 'Employee Type' : 'ఉద్యోగి రకం'}</Text>
                     <View style={styles.typeContainer}>
                         <TouchableOpacity
                             style={[styles.typeButton, workerType === 'permanent' && styles.typeButtonActive]}
@@ -125,7 +129,7 @@ const CreateWorkerModal: React.FC<CreateWorkerModalProps> = ({
                             disabled={loading}
                         >
                             <Text style={[styles.typeButtonText, workerType === 'permanent' && styles.typeButtonTextActive]}>
-                                Permanent
+                                {t.workers.permanent}
                             </Text>
                         </TouchableOpacity>
                         <TouchableOpacity
@@ -134,7 +138,7 @@ const CreateWorkerModal: React.FC<CreateWorkerModalProps> = ({
                             disabled={loading}
                         >
                             <Text style={[styles.typeButtonText, workerType === 'contract' && styles.typeButtonTextActive]}>
-                                Contract
+                                {t.workers.contract}
                             </Text>
                         </TouchableOpacity>
                     </View>
@@ -145,7 +149,7 @@ const CreateWorkerModal: React.FC<CreateWorkerModalProps> = ({
                             onPress={handleClose}
                             disabled={loading}
                         >
-                            <Text style={styles.cancelButtonText}>Cancel</Text>
+                            <Text style={styles.cancelButtonText}>{t.modals.cancel}</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             style={[styles.button, styles.createButton, loading && styles.disabledButton]}
@@ -155,7 +159,9 @@ const CreateWorkerModal: React.FC<CreateWorkerModalProps> = ({
                             {loading ? (
                                 <ActivityIndicator color="#fff" />
                             ) : (
-                                <Text style={styles.createButtonText}>Add Worker</Text>
+                                <Text style={styles.createButtonText}>
+                                    {language === 'en' ? 'Add Worker' : 'కార్మికుడిని చేర్చండి'}
+                                </Text>
                             )}
                         </TouchableOpacity>
                     </View>

@@ -8,10 +8,10 @@ import {
     StyleSheet,
     ActivityIndicator,
 } from 'react-native';
-import { Branch } from '../types';
 import branchService from '../services/branch.service';
 import { useData } from '../contexts/DataContext';
 import ErrorMessage from './ErrorMessage';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface CreateBranchModalProps {
     visible: boolean;
@@ -24,6 +24,7 @@ const CreateBranchModal: React.FC<CreateBranchModalProps> = ({
     onClose,
     onCreate,
 }) => {
+    const { t, language } = useLanguage();
     const [branchName, setBranchName] = useState('');
     const [permanentRate, setPermanentRate] = useState('');
     const [contractRate, setContractRate] = useState('');
@@ -56,15 +57,15 @@ const CreateBranchModal: React.FC<CreateBranchModalProps> = ({
                     setContractRate('');
                     onClose();
                 } catch (err: any) {
-                    setError(err.message || 'Failed to create branch');
+                    setError(err.message || (language === 'en' ? 'Failed to create branch' : 'శాఖను సృష్టించడం విఫలమైంది'));
                 } finally {
                     setLoading(false);
                 }
             } else {
-                setError('Please enter valid rates greater than 0');
+                setError(language === 'en' ? 'Please enter valid rates greater than 0' : 'దయచేసి 0 కంటే ఎక్కువ విలువైన రేట్లను నమోదు చేయండి');
             }
         } else {
-            setError('Please fill in all fields');
+            setError(language === 'en' ? 'Please fill in all fields' : 'దయచేసి అన్ని వివరాలను పూరించండి');
         }
     };
 
@@ -79,33 +80,37 @@ const CreateBranchModal: React.FC<CreateBranchModalProps> = ({
         <Modal visible={visible} transparent animationType="fade">
             <View style={styles.modalOverlay}>
                 <View style={styles.modalContent}>
-                    <Text style={styles.modalTitle}>Create New Branch</Text>
+                    <Text style={styles.modalTitle}>{t.modals.createBranch}</Text>
 
                     {error && <ErrorMessage message={error} onDismiss={() => setError(null)} />}
 
-                    <Text style={styles.label}>Branch Name</Text>
+                    <Text style={styles.label}>{t.modals.branchName}</Text>
                     <TextInput
                         style={styles.input}
-                        placeholder="Enter branch name"
+                        placeholder={language === 'en' ? 'Enter branch name' : 'శాఖ పేరు నమోదు చేయండి'}
                         value={branchName}
                         onChangeText={setBranchName}
                         editable={!loading}
                     />
 
-                    <Text style={styles.label}>Permanent Worker Rate per 1000 Beedis</Text>
+                    <Text style={styles.label}>
+                        {language === 'en' ? 'Permanent Worker Rate per 1000 Beedis' : '1000 బీడీలకు శాశ్వత కార్మికుడి రేటు'}
+                    </Text>
                     <TextInput
                         style={styles.input}
-                        placeholder="Enter permanent rate (₹)"
+                        placeholder={language === 'en' ? 'Enter permanent rate (₹)' : 'శాశ్వత రేటు నమోదు చేయండి (₹)'}
                         value={permanentRate}
                         onChangeText={setPermanentRate}
                         keyboardType="numeric"
                         editable={!loading}
                     />
 
-                    <Text style={styles.label}>Contract Worker Rate per 1000 Beedis</Text>
+                    <Text style={styles.label}>
+                        {language === 'en' ? 'Contract Worker Rate per 1000 Beedis' : '1000 బీడీలకు కాంట్రాక్ట్ కార్మికుడి రేటు'}
+                    </Text>
                     <TextInput
                         style={styles.input}
-                        placeholder="Enter contract rate (₹)"
+                        placeholder={language === 'en' ? 'Enter contract rate (₹)' : 'కాంట్రాక్ట్ రేటు నమోదు చేయండి (₹)'}
                         value={contractRate}
                         onChangeText={setContractRate}
                         keyboardType="numeric"
@@ -118,7 +123,7 @@ const CreateBranchModal: React.FC<CreateBranchModalProps> = ({
                             onPress={handleClose}
                             disabled={loading}
                         >
-                            <Text style={styles.cancelButtonText}>Cancel</Text>
+                            <Text style={styles.cancelButtonText}>{t.modals.cancel}</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             style={[styles.button, styles.createButton, loading && styles.disabledButton]}
@@ -128,7 +133,7 @@ const CreateBranchModal: React.FC<CreateBranchModalProps> = ({
                             {loading ? (
                                 <ActivityIndicator color="#fff" />
                             ) : (
-                                <Text style={styles.createButtonText}>Create</Text>
+                                <Text style={styles.createButtonText}>{t.modals.create}</Text>
                             )}
                         </TouchableOpacity>
                     </View>

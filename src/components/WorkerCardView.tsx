@@ -3,18 +3,16 @@ import {
     View,
     Text,
     ScrollView,
-    FlatList,
     TouchableOpacity,
     TextInput,
     StyleSheet,
     Linking,
-    Modal,
-    Animated,
     ActivityIndicator,
 } from 'react-native';
 import { Worker, DailyData, Branch } from '../types';
 import recordService from '../services/record.service';
 import { formatDateForAPI, getISTDateParts, getDaysInMonth as getDaysInMonthHelper, createISTDate } from '../utils/date';
+import { useLanguage } from '../contexts/LanguageContext';
 
 type TimeRange = 'day' | 'week' | 'month';
 
@@ -29,13 +27,13 @@ const WorkerCardView: React.FC<WorkerCardViewProps> = ({
     branch,
     onBack,
 }) => {
+    const { t, language } = useLanguage();
     const [selectedMonth, setSelectedMonth] = useState(new Date());
     const [deductDues, setDeductDues] = useState(true);
     const [timeRange, setTimeRange] = useState<TimeRange>('month');
     const [dropdownVisible, setDropdownVisible] = useState(false);
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [loading, setLoading] = useState(true);
-    const [saving, setSaving] = useState(false);
 
     // Track the last successfully saved value for each day + field to prevent duplicate calls
     const lastSavedValues = useRef<{ [key: string]: string }>({});
@@ -49,7 +47,7 @@ const WorkerCardView: React.FC<WorkerCardViewProps> = ({
     };
 
     const getMonthYear = (date: Date) => {
-        return date.toLocaleDateString('en-IN', { month: 'long', year: 'numeric', timeZone: 'Asia/Kolkata' });
+        return date.toLocaleDateString(language === 'en' ? 'en-IN' : 'te-IN', { month: 'long', year: 'numeric', timeZone: 'Asia/Kolkata' });
     };
 
     const navigateMonth = (direction: number) => {
@@ -106,8 +104,9 @@ const WorkerCardView: React.FC<WorkerCardViewProps> = ({
     };
 
     const getDateRangeText = () => {
+        const locale = language === 'en' ? 'en-IN' : 'te-IN';
         if (timeRange === 'day') {
-            return selectedDate.toLocaleDateString('en-IN', {
+            return selectedDate.toLocaleDateString(locale, {
                 weekday: 'short',
                 day: 'numeric',
                 month: 'short',
@@ -118,7 +117,7 @@ const WorkerCardView: React.FC<WorkerCardViewProps> = ({
             const endDate = new Date(selectedDate);
             const startDate = new Date(selectedDate);
             startDate.setDate(startDate.getDate() - 6);
-            return `${startDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', timeZone: 'Asia/Kolkata' })} - ${endDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' })}`;
+            return `${startDate.toLocaleDateString(locale, { day: 'numeric', month: 'short', timeZone: 'Asia/Kolkata' })} - ${endDate.toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' })}`;
         } else {
             return getMonthYear(selectedMonth);
         }
@@ -234,6 +233,7 @@ const WorkerCardView: React.FC<WorkerCardViewProps> = ({
         };
 
         fetchMonthlyRecords();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedMonth, worker.id]);
 
 
@@ -284,7 +284,7 @@ const WorkerCardView: React.FC<WorkerCardViewProps> = ({
 
             if (field === 'aaku' || field === 'thambaku' || field === 'dharam' ||
                 field === 'kattalu' || field === 'baakiKattalu') {
-                const numValue = parseInt(value) || 0;
+                const numValue = parseInt(value, 10) || 0;
                 updateData[field] = numValue;
             }
 
@@ -297,10 +297,10 @@ const WorkerCardView: React.FC<WorkerCardViewProps> = ({
     };
 
     const totalKattalu = dailyData.reduce((sum, day) =>
-        sum + (parseInt(day.kattalu.toString()) || 0), 0
+        sum + (parseInt(day.kattalu.toString(), 10) || 0), 0
     );
     const totalDue = dailyData.reduce((sum, day) =>
-        sum + (parseInt(day?.baakiKattalu.toString()) || 0), 0
+        sum + (parseInt(day?.baakiKattalu.toString(), 10) || 0), 0
     );
     const effectiveKattalu = deductDues ? totalKattalu - totalDue : totalKattalu;
     // Calculate salary based on worker type
@@ -322,14 +322,16 @@ const WorkerCardView: React.FC<WorkerCardViewProps> = ({
                         style={styles.backButton}
                         onPress={onBack}
                     >
-                        <Text style={styles.backButtonText}>← Back to Workers</Text>
+                        <Text style={styles.backButtonText}>{t.nav.backToWorkers}</Text>
                     </TouchableOpacity>
 
                     <View style={styles.workerInfo}>
                         <View style={styles.workerNameRow}>
                             <Text style={styles.workerCardTitle}>{worker.name}</Text>
                             <View style={[styles.typeBadge, worker.employeeType === 'PERMANENT' ? styles.typeBadgePermanent : styles.typeBadgeContract]}>
-                                <Text style={styles.typeBadgeText}>{worker.employeeType === 'PERMANENT' ? 'Permanent' : 'Contract'}</Text>
+                                <Text style={styles.typeBadgeText}>
+                                    {worker.employeeType === 'PERMANENT' ? t.workers.permanent : t.workers.contract}
+                                </Text>
                             </View>
                         </View>
                         <Text style={styles.workerCardSerial}>{worker.serialNo}</Text>
@@ -342,21 +344,25 @@ const WorkerCardView: React.FC<WorkerCardViewProps> = ({
                                     Linking.openURL(`tel:${worker.phone}`);
                                 }}
                             >
-                                <Text style={styles.callButtonText}>📞 Call</Text>
+                                <Text style={styles.callButtonText}>📞 {t.workerCard.call}</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
 
                     {/* Time Range Filter Dropdown */}
                     <View style={styles.filterContainer}>
-                        <Text style={styles.filterLabel}>View Data:</Text>
+                        <Text style={styles.filterLabel}>{language === 'en' ? 'View Data:' : 'డేటాను చూడండి:'}</Text>
                         <TouchableOpacity
                             style={styles.dropdownButton}
                             onPress={() => setDropdownVisible(!dropdownVisible)}
                         >
                             <View style={styles.dropdownButtonContent}>
                                 <Text style={styles.dropdownButtonText}>
-                                    {timeRange === 'day' ? '📅 Day' : timeRange === 'week' ? '📊 Week' : '📆 Month'}
+                                    {timeRange === 'day'
+                                        ? (language === 'en' ? '📅 Day' : '📅 రోజు')
+                                        : timeRange === 'week'
+                                            ? (language === 'en' ? '📊 Week' : '📊 వారం')
+                                            : (language === 'en' ? '📆 Month' : '📆 నెల')}
                                 </Text>
                                 <Text style={[styles.dropdownArrow, dropdownVisible && styles.dropdownArrowUp]}>▼</Text>
                             </View>
@@ -372,7 +378,7 @@ const WorkerCardView: React.FC<WorkerCardViewProps> = ({
                                     }}
                                 >
                                     <Text style={[styles.dropdownItemText, timeRange === 'day' && styles.dropdownItemTextActive]}>
-                                        📅 Single Day
+                                        {language === 'en' ? '📅 Single Day' : '📅 ఒకే రోజు'}
                                     </Text>
                                     {timeRange === 'day' && <Text style={styles.checkIcon}>✓</Text>}
                                 </TouchableOpacity>
@@ -385,7 +391,7 @@ const WorkerCardView: React.FC<WorkerCardViewProps> = ({
                                     }}
                                 >
                                     <Text style={[styles.dropdownItemText, timeRange === 'week' && styles.dropdownItemTextActive]}>
-                                        📊 Last 7 Days
+                                        {language === 'en' ? '📊 Last 7 Days' : '📊 గత 7 రోజులు'}
                                     </Text>
                                     {timeRange === 'week' && <Text style={styles.checkIcon}>✓</Text>}
                                 </TouchableOpacity>
@@ -398,7 +404,7 @@ const WorkerCardView: React.FC<WorkerCardViewProps> = ({
                                     }}
                                 >
                                     <Text style={[styles.dropdownItemText, timeRange === 'month' && styles.dropdownItemTextActive]}>
-                                        📆 Full Month
+                                        {language === 'en' ? '📆 Full Month' : '📆 పూర్తి నెల'}
                                     </Text>
                                     {timeRange === 'month' && <Text style={styles.checkIcon}>✓</Text>}
                                 </TouchableOpacity>
@@ -417,7 +423,11 @@ const WorkerCardView: React.FC<WorkerCardViewProps> = ({
                         <View style={styles.dateTextContainer}>
                             <Text style={styles.dateRangeText}>{getDateRangeText()}</Text>
                             <Text style={styles.dateRangeSubtext}>
-                                {timeRange === 'day' ? 'Single day view' : timeRange === 'week' ? '7 days view' : 'Monthly view'}
+                                {timeRange === 'day'
+                                    ? (language === 'en' ? 'Single day view' : 'ఒకే రోజు వీక్షణ')
+                                    : timeRange === 'week'
+                                        ? (language === 'en' ? '7 days view' : '7 రోజుల వీక్షణ')
+                                        : (language === 'en' ? 'Monthly view' : 'నెలవారీ వీక్షణ')}
                             </Text>
                         </View>
                         <TouchableOpacity
@@ -431,10 +441,10 @@ const WorkerCardView: React.FC<WorkerCardViewProps> = ({
                     {/* Current Date Indicator */}
                     <View style={styles.currentDateContainer}>
                         <View style={styles.todayBadge}>
-                            <Text style={styles.todayBadgeText}>TODAY</Text>
+                            <Text style={styles.todayBadgeText}>{language === 'en' ? 'TODAY' : 'నేడు'}</Text>
                         </View>
                         <Text style={styles.currentDateText}>
-                            {new Date().toLocaleDateString('en-IN', {
+                            {new Date().toLocaleDateString(language === 'en' ? 'en-IN' : 'te-IN', {
                                 weekday: 'long',
                                 day: 'numeric',
                                 month: 'long',
@@ -448,12 +458,12 @@ const WorkerCardView: React.FC<WorkerCardViewProps> = ({
                 {/* Sticky Table Header */}
                 <View style={styles.tableHeaderContainer}>
                     <View style={styles.tableHeader}>
-                        <Text style={[styles.tableCell, styles.dayCell, styles.headerCell]}>Day</Text>
-                        <Text style={[styles.tableCell, styles.headerCell]}>Aaku</Text>
-                        <Text style={[styles.tableCell, styles.headerCell]}>Thambaku</Text>
-                        <Text style={[styles.tableCell, styles.headerCell]}>Dharam</Text>
-                        <Text style={[styles.tableCell, styles.kattaluHeader]}>Kattalu</Text>
-                        <Text style={[styles.tableCell, styles.dueHeader]}>Baaki Kattalu</Text>
+                        <Text style={[styles.tableCell, styles.dayCell, styles.headerCell]}>{t.workerCard.day}</Text>
+                        <Text style={[styles.tableCell, styles.headerCell]}>{t.workerCard.aaku}</Text>
+                        <Text style={[styles.tableCell, styles.headerCell]}>{t.workerCard.thambaku}</Text>
+                        <Text style={[styles.tableCell, styles.headerCell]}>{t.workerCard.dharam}</Text>
+                        <Text style={[styles.tableCell, styles.kattaluHeader, styles.headerCell]}>{t.workerCard.kattalu}</Text>
+                        <Text style={[styles.tableCell, styles.dueHeader, styles.headerCell]}>{t.workerCard.baakiKattalu}</Text>
                     </View>
                 </View>
 
@@ -461,7 +471,9 @@ const WorkerCardView: React.FC<WorkerCardViewProps> = ({
                 {loading ? (
                     <View style={styles.loadingContainer}>
                         <ActivityIndicator size="large" color="#10b981" />
-                        <Text style={styles.loadingText}>Loading records...</Text>
+                        <Text style={styles.loadingText}>
+                            {language === 'en' ? 'Loading records...' : 'రికార్డులను లోడ్ చేస్తోంది...'}
+                        </Text>
                     </View>
                 ) : (
                     dailyData
@@ -545,14 +557,14 @@ const WorkerCardView: React.FC<WorkerCardViewProps> = ({
 
                 {/* Salary Summary */}
                 <View style={styles.salaryCard}>
-                    <Text style={styles.salaryTitle}>Monthly Summary</Text>
+                    <Text style={styles.salaryTitle}>{t.workerCard.monthlySummary}</Text>
 
                     <View style={styles.salaryRow}>
-                        <Text style={styles.salaryLabel}>Total Kattalu:</Text>
+                        <Text style={styles.salaryLabel}>{t.workerCard.totalKattalu}</Text>
                         <Text style={styles.salaryValue}>{totalKattalu}</Text>
                     </View>
                     <View style={styles.salaryRow}>
-                        <Text style={styles.salaryLabel}>Total Due:</Text>
+                        <Text style={styles.salaryLabel}>{t.workerCard.totalDue}</Text>
                         <Text style={styles.salaryValue}>{totalDue}</Text>
                     </View>
 
@@ -563,26 +575,26 @@ const WorkerCardView: React.FC<WorkerCardViewProps> = ({
                         <View style={[styles.checkbox, deductDues && styles.checkboxChecked]}>
                             {deductDues && <Text style={styles.checkmark}>✓</Text>}
                         </View>
-                        <Text style={styles.checkboxLabel}>Deduct dues from salary</Text>
+                        <Text style={styles.checkboxLabel}>{t.workerCard.deductDues}</Text>
                     </TouchableOpacity>
 
                     <View style={styles.salaryRow}>
-                        <Text style={styles.salaryLabel}>Effective Kattalu:</Text>
+                        <Text style={styles.salaryLabel}>{t.workerCard.effectiveKattalu}</Text>
                         <Text style={styles.salaryValue}>{effectiveKattalu}</Text>
                     </View>
                     <View style={styles.salaryRow}>
-                        <Text style={styles.salaryLabel}>Rate per 1000:</Text>
+                        <Text style={styles.salaryLabel}>{t.workerCard.ratePer1000}</Text>
                         <Text style={styles.salaryValue}>₹{branchRate}</Text>
                     </View>
 
                     <View style={[styles.salaryRow, styles.totalRow]}>
-                        <Text style={styles.totalLabel}>Total Salary:</Text>
+                        <Text style={styles.totalLabel}>{t.workerCard.totalSalary}</Text>
                         <Text style={styles.totalValue}>₹{totalSalary.toFixed(2)}</Text>
                     </View>
                 </View>
 
                 <TouchableOpacity style={styles.saveButton}>
-                    <Text style={styles.saveButtonText}>Save Monthly Data</Text>
+                    <Text style={styles.saveButtonText}>{t.workerCard.saveMonthlyData}</Text>
                 </TouchableOpacity>
             </ScrollView>
         </View>

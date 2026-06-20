@@ -1,7 +1,7 @@
 import { API_CONFIG } from '../config/api';
 import apiService from './api.service';
 import { TokenStorage, UserStorage, SubscriptionStorage } from '../utils/storage';
-import { Boss, AuthResponse, ApiResponse, Subscription } from '../types';
+import { Boss, AuthResponse, Subscription } from '../types';
 
 interface GetCurrentUserResult {
     user: Boss;
@@ -120,6 +120,44 @@ class AuthService {
     // Get stored subscription data (without API call)
     async getStoredSubscription(): Promise<Subscription | null> {
         return await SubscriptionStorage.getSubscription();
+    }
+
+    // Forgot Password - send reset code
+    async forgotPassword(email: string): Promise<string> {
+        try {
+            const response = await apiService.post<{ message: string }>(
+                API_CONFIG.ENDPOINTS.FORGOT_PASSWORD,
+                { email },
+                false // No auth required
+            );
+
+            if (response.success) {
+                return response.message || 'Verification code sent';
+            }
+
+            throw new Error(response.error || 'Failed to send verification code');
+        } catch (error: any) {
+            throw new Error(error.message || 'Failed to send verification code');
+        }
+    }
+
+    // Reset Password with code
+    async resetPassword(email: string, token: string, password: string): Promise<string> {
+        try {
+            const response = await apiService.post<{ message: string }>(
+                API_CONFIG.ENDPOINTS.RESET_PASSWORD,
+                { email, token, password },
+                false // No auth required
+            );
+
+            if (response.success) {
+                return response.message || 'Password reset successful';
+            }
+
+            throw new Error(response.error || 'Failed to reset password');
+        } catch (error: any) {
+            throw new Error(error.message || 'Failed to reset password');
+        }
     }
 }
 

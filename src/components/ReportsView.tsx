@@ -8,9 +8,9 @@ import {
     ActivityIndicator,
 } from 'react-native';
 import { Branch } from '../types';
-import { formatDateForAPI, getISTDateParts, createISTDate } from '../utils/date';
-import recordService from '../services/record.service';
+import { getISTDateParts, createISTDate } from '../utils/date';
 import reportService from '../services/report.service';
+import { useLanguage } from '../contexts/LanguageContext';
 
 type ReportPeriod = 'daily' | 'monthly' | 'yearly';
 
@@ -33,6 +33,7 @@ interface ReportsViewProps {
 }
 
 const ReportsView: React.FC<ReportsViewProps> = ({ branches, onBack }) => {
+    const { t, language } = useLanguage();
     const [selectedBranch, setSelectedBranch] = useState<Branch | null>(null);
     const [period, setPeriod] = useState<ReportPeriod>('daily');
     const [selectedDate, setSelectedDate] = useState(new Date());
@@ -52,6 +53,7 @@ const ReportsView: React.FC<ReportsViewProps> = ({ branches, onBack }) => {
         if (selectedBranch) {
             fetchDetailReport();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedBranch, period, selectedDate]);
 
     const fetchBranchSummaries = async () => {
@@ -200,7 +202,7 @@ const ReportsView: React.FC<ReportsViewProps> = ({ branches, onBack }) => {
 
     const getDateDisplay = () => {
         if (period === 'daily') {
-            return selectedDate.toLocaleDateString('en-IN', {
+            return selectedDate.toLocaleDateString(language === 'en' ? 'en-IN' : 'te-IN', {
                 weekday: 'long',
                 day: 'numeric',
                 month: 'long',
@@ -208,7 +210,7 @@ const ReportsView: React.FC<ReportsViewProps> = ({ branches, onBack }) => {
                 timeZone: 'Asia/Kolkata'
             });
         } else if (period === 'monthly') {
-            return selectedDate.toLocaleDateString('en-IN', {
+            return selectedDate.toLocaleDateString(language === 'en' ? 'en-IN' : 'te-IN', {
                 month: 'long',
                 year: 'numeric',
                 timeZone: 'Asia/Kolkata'
@@ -220,7 +222,7 @@ const ReportsView: React.FC<ReportsViewProps> = ({ branches, onBack }) => {
     };
 
     const formatNumber = (num: number) => {
-        return num.toLocaleString('en-IN');
+        return num.toLocaleString(language === 'en' ? 'en-IN' : 'te-IN');
     };
 
     const handleBackFromDetail = () => {
@@ -236,17 +238,19 @@ const ReportsView: React.FC<ReportsViewProps> = ({ branches, onBack }) => {
                 {/* Header */}
                 <View style={styles.header}>
                     <TouchableOpacity style={styles.backButton} onPress={onBack}>
-                        <Text style={styles.backButtonText}>← Back</Text>
+                        <Text style={styles.backButtonText}>
+                            {language === 'en' ? '← Back' : '← వెనుకకు'}
+                        </Text>
                     </TouchableOpacity>
-                    <Text style={styles.title}>📊 Reports</Text>
-                    <Text style={styles.subtitle}>Branches</Text>
+                    <Text style={styles.title}>{language === 'en' ? '📊 Reports' : '📊 నివేదికలు'}</Text>
+                    <Text style={styles.subtitle}>{language === 'en' ? 'Branches' : 'శాఖలు'}</Text>
                 </View>
 
                 {/* Today's Date */}
                 <View style={styles.todayBanner}>
-                    <Text style={styles.todayLabel}>TODAY</Text>
+                    <Text style={styles.todayLabel}>{language === 'en' ? 'TODAY' : 'నేడు'}</Text>
                     <Text style={styles.todayDate}>
-                        {new Date().toLocaleDateString('en-IN', {
+                        {new Date().toLocaleDateString(language === 'en' ? 'en-IN' : 'te-IN', {
                             weekday: 'long',
                             day: 'numeric',
                             month: 'long',
@@ -261,13 +265,17 @@ const ReportsView: React.FC<ReportsViewProps> = ({ branches, onBack }) => {
                     {loading ? (
                         <View style={styles.loadingContainer}>
                             <ActivityIndicator size="large" color="#10b981" />
-                            <Text style={styles.loadingText}>Loading branches...</Text>
+                            <Text style={styles.loadingText}>
+                                {language === 'en' ? 'Loading branches...' : 'శాఖలను లోడ్ చేస్తోంది...'}
+                            </Text>
                         </View>
                     ) : branchSummaries.length === 0 ? (
                         <View style={styles.emptyContainer}>
                             <Text style={styles.emptyText}>🏢</Text>
-                            <Text style={styles.emptyTitle}>No Branches</Text>
-                            <Text style={styles.emptySubtitle}>Add branches to see reports</Text>
+                            <Text style={styles.emptyTitle}>{language === 'en' ? 'No Branches' : 'శాఖలు లేవు'}</Text>
+                            <Text style={styles.emptySubtitle}>
+                                {language === 'en' ? 'Add branches to see reports' : 'నివేదికలను చూడటానికి శాఖలను జోడించండి'}
+                            </Text>
                         </View>
                     ) : (
                         <>
@@ -276,19 +284,25 @@ const ReportsView: React.FC<ReportsViewProps> = ({ branches, onBack }) => {
                                 style={styles.totalCard}
                                 onPress={() => {
                                     // Set a special "ALL" branch to show combined metrics
-                                    setSelectedBranch({ id: 'ALL', name: 'All Branches' } as Branch);
+                                    setSelectedBranch({ id: 'ALL', name: language === 'en' ? 'All Branches' : 'అన్ని శాఖలు' } as Branch);
                                 }}
                                 activeOpacity={0.7}
                             >
                                 <View style={styles.totalCardLeft}>
                                     <Text style={styles.totalCardIcon}>📊</Text>
                                     <View>
-                                        <Text style={styles.totalCardTitle}>All Branches</Text>
-                                        <Text style={styles.totalCardSubtext}>Tap to view combined details</Text>
+                                        <Text style={styles.totalCardTitle}>
+                                            {language === 'en' ? 'All Branches' : 'అన్ని శాఖలు'}
+                                        </Text>
+                                        <Text style={styles.totalCardSubtext}>
+                                            {language === 'en' ? 'Tap to view combined details' : 'కలిపిన వివరాలను చూడటానికి నొక్కండి'}
+                                        </Text>
                                     </View>
                                 </View>
                                 <View style={styles.totalCardRight}>
-                                    <Text style={styles.totalKattaluLabel}>Total Kattalu</Text>
+                                    <Text style={styles.totalKattaluLabel}>
+                                        {language === 'en' ? 'Total Kattalu' : 'మొత్తం కట్టలు'}
+                                    </Text>
                                     <Text style={styles.totalKattaluValue}>
                                         {formatNumber(
                                             branchSummaries.reduce((sum, b) => sum + b.todayKattalu, 0)
@@ -312,11 +326,15 @@ const ReportsView: React.FC<ReportsViewProps> = ({ branches, onBack }) => {
                                         <Text style={styles.branchListIcon}>🏢</Text>
                                         <View>
                                             <Text style={styles.branchListName}>{summary.branchName}</Text>
-                                            <Text style={styles.branchListSubtext}>Tap to view details</Text>
+                                            <Text style={styles.branchListSubtext}>
+                                                {language === 'en' ? 'Tap to view details' : 'వివరాలను చూడటానికి నొక్కండి'}
+                                            </Text>
                                         </View>
                                     </View>
                                     <View style={styles.branchListRight}>
-                                        <Text style={styles.kattaluLabel}>Total Kattalu</Text>
+                                        <Text style={styles.kattaluLabel}>
+                                            {language === 'en' ? 'Total Kattalu' : 'మొత్తం కట్టలు'}
+                                        </Text>
                                         <Text style={styles.kattaluValue}>{formatNumber(summary.todayKattalu)}</Text>
                                     </View>
                                 </TouchableOpacity>
@@ -334,7 +352,7 @@ const ReportsView: React.FC<ReportsViewProps> = ({ branches, onBack }) => {
             {/* Header */}
             <View style={styles.header}>
                 <TouchableOpacity style={styles.backButton} onPress={handleBackFromDetail}>
-                    <Text style={styles.backButtonText}>← Back to Branches</Text>
+                    <Text style={styles.backButtonText}>{t.nav.backToBranches}</Text>
                 </TouchableOpacity>
                 <View style={styles.branchTitleRow}>
                     <Text style={styles.branchTitleIcon}>🏢</Text>
@@ -349,7 +367,7 @@ const ReportsView: React.FC<ReportsViewProps> = ({ branches, onBack }) => {
                     onPress={() => setPeriod('daily')}
                 >
                     <Text style={[styles.tabText, period === 'daily' && styles.tabTextActive]}>
-                        📅 Daily
+                        {language === 'en' ? '📅 Daily' : '📅 రోజువారీ'}
                     </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -357,7 +375,7 @@ const ReportsView: React.FC<ReportsViewProps> = ({ branches, onBack }) => {
                     onPress={() => setPeriod('monthly')}
                 >
                     <Text style={[styles.tabText, period === 'monthly' && styles.tabTextActive]}>
-                        📆 Monthly
+                        {language === 'en' ? '📆 Monthly' : '📆 నెలవారీ'}
                     </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -365,7 +383,7 @@ const ReportsView: React.FC<ReportsViewProps> = ({ branches, onBack }) => {
                     onPress={() => setPeriod('yearly')}
                 >
                     <Text style={[styles.tabText, period === 'yearly' && styles.tabTextActive]}>
-                        📈 Yearly
+                        {language === 'en' ? '📈 Yearly' : '📈 వార్షిక'}
                     </Text>
                 </TouchableOpacity>
             </View>
@@ -388,20 +406,26 @@ const ReportsView: React.FC<ReportsViewProps> = ({ branches, onBack }) => {
                 {loading ? (
                     <View style={styles.loadingContainer}>
                         <ActivityIndicator size="large" color="#10b981" />
-                        <Text style={styles.loadingText}>Loading report...</Text>
+                        <Text style={styles.loadingText}>
+                            {language === 'en' ? 'Loading report...' : 'నివేదికను లోడ్ చేస్తోంది...'}
+                        </Text>
                     </View>
                 ) : !detailReport ? (
                     <View style={styles.emptyContainer}>
                         <Text style={styles.emptyText}>📊</Text>
-                        <Text style={styles.emptyTitle}>No Data</Text>
-                        <Text style={styles.emptySubtitle}>No records for this period</Text>
+                        <Text style={styles.emptyTitle}>{language === 'en' ? 'No Data' : 'డేటా లేదు'}</Text>
+                        <Text style={styles.emptySubtitle}>
+                            {language === 'en' ? 'No records for this period' : 'ఈ కాలానికి రికార్డులు లేవు'}
+                        </Text>
                     </View>
                 ) : (
                     <View style={styles.metricsContainer}>
                         {/* Total Kattalu */}
                         <View style={[styles.metricCard, styles.kattaluCard]}>
                             <Text style={styles.metricIcon}>📦</Text>
-                            <Text style={styles.metricLabel}>Total Kattalu</Text>
+                            <Text style={styles.metricLabel}>
+                                {language === 'en' ? 'Total Kattalu' : 'మొత్తం కట్టలు'}
+                            </Text>
                             <Text style={styles.metricValue}>
                                 {formatNumber(detailReport.totalKattalu)}
                             </Text>
@@ -410,7 +434,9 @@ const ReportsView: React.FC<ReportsViewProps> = ({ branches, onBack }) => {
                         {/* Aaku Spent */}
                         <View style={[styles.metricCard, styles.aakuCard]}>
                             <Text style={styles.metricIcon}>🌾</Text>
-                            <Text style={styles.metricLabel}>Aaku Spent</Text>
+                            <Text style={styles.metricLabel}>
+                                {language === 'en' ? 'Aaku Spent' : 'ఆకు ఖర్చు'}
+                            </Text>
                             <Text style={styles.metricValue}>
                                 {formatNumber(detailReport.aakuSpent)}
                             </Text>
@@ -419,7 +445,9 @@ const ReportsView: React.FC<ReportsViewProps> = ({ branches, onBack }) => {
                         {/* Thambaku Spent */}
                         <View style={[styles.metricCard, styles.thamakuCard]}>
                             <Text style={styles.metricIcon}>🍃</Text>
-                            <Text style={styles.metricLabel}>Thambaku Spent</Text>
+                            <Text style={styles.metricLabel}>
+                                {language === 'en' ? 'Thambaku Spent' : 'తంబాకు ఖర్చు'}
+                            </Text>
                             <Text style={styles.metricValue}>
                                 {formatNumber(detailReport.thamakuSpent)}
                             </Text>
@@ -428,7 +456,9 @@ const ReportsView: React.FC<ReportsViewProps> = ({ branches, onBack }) => {
                         {/* Dharam Spent */}
                         <View style={[styles.metricCard, styles.dharamCard]}>
                             <Text style={styles.metricIcon}>✨</Text>
-                            <Text style={styles.metricLabel}>Dharam Spent</Text>
+                            <Text style={styles.metricLabel}>
+                                {language === 'en' ? 'Dharam Spent' : 'ధరం ఖర్చు'}
+                            </Text>
                             <Text style={styles.metricValue}>
                                 {formatNumber(detailReport.dharamSpent)}
                             </Text>

@@ -54,6 +54,31 @@ const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
         }
     };
 
+    const handleLogout = () => {
+        Alert.alert(
+            language === 'en' ? 'Logout' : 'లాగ్ అవుట్',
+            language === 'en' ? 'Are you sure you want to logout?' : 'మీరు ఖచ్చితంగా లాగ్ అవుట్ చేయాలనుకుంటున్నారా?',
+            [
+                {
+                    text: language === 'en' ? 'Cancel' : 'రద్దు చేయి',
+                    style: 'cancel',
+                },
+                {
+                    text: language === 'en' ? 'Logout' : 'లాగ్ అవుట్',
+                    onPress: async () => {
+                        try {
+                            await logout();
+                        } catch (error) {
+                            console.error('Logout error:', error);
+                            Alert.alert('Error', 'Failed to logout');
+                        }
+                    },
+                    style: 'destructive',
+                },
+            ]
+        );
+    };
+
     const handleSubscribe = async () => {
         try {
             setLoading(true);
@@ -359,7 +384,7 @@ const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
 
             {/* Logout Button */}
             {isLocked && (
-                <TouchableOpacity style={styles.logoutButton} onPress={logout}>
+                <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
                     <Text style={styles.logoutButtonText}>{t.subscription.logout}</Text>
                 </TouchableOpacity>
             )}

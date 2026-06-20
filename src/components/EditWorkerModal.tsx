@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { Worker } from '../types';
 import { useData } from '../contexts/DataContext';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface EditWorkerModalProps {
     visible: boolean;
@@ -25,6 +26,7 @@ const EditWorkerModal: React.FC<EditWorkerModalProps> = ({
     onClose,
     onUpdate,
 }) => {
+    const { t, language } = useLanguage();
     const { updateWorker } = useData();
     const [workerName, setWorkerName] = useState(worker?.name || '');
     const [serialNo, setSerialNo] = useState(worker?.serialNo || '');
@@ -43,7 +45,10 @@ const EditWorkerModal: React.FC<EditWorkerModalProps> = ({
 
     const handleUpdate = async () => {
         if (!worker || !workerName.trim() || !phone.trim()) {
-            Alert.alert('Invalid Input', 'Please fill in all required fields');
+            Alert.alert(
+                language === 'en' ? 'Invalid Input' : 'చెల్లని ఇన్‌పుట్',
+                language === 'en' ? 'Please fill in all required fields' : 'దయచేసి అవసరమైన అన్ని వివరాలను పూరించండి'
+            );
             return;
         }
 
@@ -60,11 +65,17 @@ const EditWorkerModal: React.FC<EditWorkerModalProps> = ({
             // Call parent callback with updated worker data
             onUpdate(updatedWorker.id, updatedWorker.name, updatedWorker.serialNo, updatedWorker.phone || '', updatedWorker.employeeType);
 
-            Alert.alert('Success', 'Worker updated successfully');
+            Alert.alert(
+                language === 'en' ? 'Success' : 'విజయం',
+                language === 'en' ? 'Worker updated successfully' : 'కార్మికుడి వివరాలు విజయవంతంగా నవీకరించబడ్డాయి'
+            );
             onClose();
         } catch (error: any) {
             console.error('Error updating worker:', error.message);
-            Alert.alert('Error', error.message || 'Failed to update worker');
+            Alert.alert(
+                language === 'en' ? 'Error' : 'లోపం',
+                error.message || (language === 'en' ? 'Failed to update worker' : 'కార్మికుడి వివరాల నవీకరణ విఫలమైంది')
+            );
         } finally {
             setLoading(false);
         }
@@ -84,18 +95,20 @@ const EditWorkerModal: React.FC<EditWorkerModalProps> = ({
         <Modal visible={visible} transparent animationType="fade">
             <View style={styles.modalOverlay}>
                 <View style={styles.modalContent}>
-                    <Text style={styles.modalTitle}>Edit Worker</Text>
+                    <Text style={styles.modalTitle}>
+                        {language === 'en' ? 'Edit Worker' : 'కార్మికుడి వివరాల సవరణ'}
+                    </Text>
 
-                    <Text style={styles.label}>Worker Name</Text>
+                    <Text style={styles.label}>{language === 'en' ? 'Worker Name' : 'కార్మికుడి పేరు'}</Text>
                     <TextInput
                         style={styles.input}
-                        placeholder="Enter worker name"
+                        placeholder={language === 'en' ? 'Enter worker name' : 'కార్మికుడి పేరు నమోదు చేయండి'}
                         value={workerName}
                         onChangeText={setWorkerName}
                         editable={!loading}
                     />
 
-                    <Text style={styles.label}>Serial Number</Text>
+                    <Text style={styles.label}>{language === 'en' ? 'Serial Number' : 'క్రమ సంఖ్య'}</Text>
                     <TextInput
                         style={styles.input}
                         placeholder="e.g., W001"
@@ -104,17 +117,17 @@ const EditWorkerModal: React.FC<EditWorkerModalProps> = ({
                         editable={false}
                     />
 
-                    <Text style={styles.label}>Phone Number</Text>
+                    <Text style={styles.label}>{language === 'en' ? 'Phone Number' : 'ఫోన్ నంబర్'}</Text>
                     <TextInput
                         style={styles.input}
-                        placeholder="Enter phone number"
+                        placeholder={language === 'en' ? 'Enter phone number' : 'ఫోన్ నంబర్ నమోదు చేయండి'}
                         value={phone}
                         onChangeText={setPhone}
                         keyboardType="phone-pad"
                         editable={!loading}
                     />
 
-                    <Text style={styles.label}>Employee Type</Text>
+                    <Text style={styles.label}>{language === 'en' ? 'Employee Type' : 'ఉద్యోగి రకం'}</Text>
                     <View style={styles.typeContainer}>
                         <TouchableOpacity
                             style={[styles.typeButton, employeeType === 'PERMANENT' && styles.typeButtonActive]}
@@ -122,7 +135,7 @@ const EditWorkerModal: React.FC<EditWorkerModalProps> = ({
                             disabled={loading}
                         >
                             <Text style={[styles.typeButtonText, employeeType === 'PERMANENT' && styles.typeButtonTextActive]}>
-                                Permanent
+                                {t.workers.permanent}
                             </Text>
                         </TouchableOpacity>
                         <TouchableOpacity
@@ -131,7 +144,7 @@ const EditWorkerModal: React.FC<EditWorkerModalProps> = ({
                             disabled={loading}
                         >
                             <Text style={[styles.typeButtonText, employeeType === 'CONTRACT' && styles.typeButtonTextActive]}>
-                                Contract
+                                {t.workers.contract}
                             </Text>
                         </TouchableOpacity>
                     </View>
@@ -142,7 +155,7 @@ const EditWorkerModal: React.FC<EditWorkerModalProps> = ({
                             onPress={handleClose}
                             disabled={loading}
                         >
-                            <Text style={styles.cancelButtonText}>Cancel</Text>
+                            <Text style={styles.cancelButtonText}>{t.modals.cancel}</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             style={[styles.button, styles.updateButton, loading && styles.disabledButton]}
@@ -152,7 +165,7 @@ const EditWorkerModal: React.FC<EditWorkerModalProps> = ({
                             {loading ? (
                                 <ActivityIndicator size="small" color="#fff" />
                             ) : (
-                                <Text style={styles.updateButtonText}>Update</Text>
+                                <Text style={styles.updateButtonText}>{t.modals.update}</Text>
                             )}
                         </TouchableOpacity>
                     </View>

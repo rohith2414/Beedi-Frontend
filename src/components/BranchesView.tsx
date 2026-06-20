@@ -7,6 +7,7 @@ import {
     StyleSheet,
 } from 'react-native';
 import { Branch } from '../types';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface BranchesViewProps {
     branches: Branch[];
@@ -23,22 +24,24 @@ const BranchesView: React.FC<BranchesViewProps> = ({
     onBack,
     onCreateBranch,
 }) => {
+    const { t, language } = useLanguage();
+
     return (
         <View style={styles.container}>
             <TouchableOpacity
                 style={styles.backButton}
                 onPress={onBack}
             >
-                <Text style={styles.backButtonText}>← Back to Dashboard</Text>
+                <Text style={styles.backButtonText}>{t.nav.backToDashboard}</Text>
             </TouchableOpacity>
 
             <View style={styles.headerRow}>
-                <Text style={styles.headerTitle}>Select Branch</Text>
+                <Text style={styles.headerTitle}>{t.branches.selectBranch}</Text>
                 <TouchableOpacity
                     style={styles.createButton}
                     onPress={onCreateBranch}
                 >
-                    <Text style={styles.createButtonText}>+ Create</Text>
+                    <Text style={styles.createButtonText}>{t.branches.create}</Text>
                 </TouchableOpacity>
             </View>
 
@@ -52,7 +55,9 @@ const BranchesView: React.FC<BranchesViewProps> = ({
                         <View style={styles.cardContent}>
                             <View style={styles.cardLeft}>
                                 <Text style={styles.branchName}>{branch.name}</Text>
-                                <Text style={styles.branchInfo}>{branch.workers} workers • P:₹{branch.permanentRate} C:₹{branch.contractRate}/1000</Text>
+                                <Text style={styles.branchInfo}>
+                                    {branch.workers} {t.branches.workersCount} • {language === 'en' ? 'P' : 'శా'}:₹{branch.permanentRate} {language === 'en' ? 'C' : 'కా'}:₹{branch.contractRate}/1000
+                                </Text>
                             </View>
                             <Text style={styles.chevron}>›</Text>
                         </View>
@@ -60,7 +65,7 @@ const BranchesView: React.FC<BranchesViewProps> = ({
                             style={styles.updateButton}
                             onPress={() => onUpdateRateRequest(branch)}
                         >
-                            <Text style={styles.updateButtonText}>⚙ Update Rate</Text>
+                            <Text style={styles.updateButtonText}>{t.branches.updateRate}</Text>
                         </TouchableOpacity>
                     </TouchableOpacity>
                 ))}

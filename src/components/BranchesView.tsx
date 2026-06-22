@@ -46,29 +46,33 @@ const BranchesView: React.FC<BranchesViewProps> = ({
             </View>
 
             <ScrollView style={styles.scrollContent}>
-                {branches.map(branch => (
-                    <TouchableOpacity
-                        key={branch.id}
-                        style={styles.branchCard}
-                        onPress={() => onSelectBranch(branch)}
-                    >
-                        <View style={styles.cardContent}>
-                            <View style={styles.cardLeft}>
-                                <Text style={styles.branchName}>{branch.name}</Text>
-                                <Text style={styles.branchInfo}>
-                                    {branch.workers} {t.branches.workersCount} • {language === 'en' ? 'P' : 'శా'}:₹{branch.permanentRate} {language === 'en' ? 'C' : 'కా'}:₹{branch.contractRate}/1000
-                                </Text>
-                            </View>
-                            <Text style={styles.chevron}>›</Text>
-                        </View>
+                {branches.length === 0 ? (
+                    <Text style={styles.emptyText}>{t.branches.noBranchesFound}</Text>
+                ) : (
+                    branches.map(branch => (
                         <TouchableOpacity
-                            style={styles.updateButton}
-                            onPress={() => onUpdateRateRequest(branch)}
+                            key={branch.id}
+                            style={styles.branchCard}
+                            onPress={() => onSelectBranch(branch)}
                         >
-                            <Text style={styles.updateButtonText}>{t.branches.updateRate}</Text>
+                            <View style={styles.cardContent}>
+                                <View style={styles.cardLeft}>
+                                    <Text style={styles.branchName}>{branch.name}</Text>
+                                    <Text style={styles.branchInfo}>
+                                        {branch.workers} {t.branches.workersCount} • {language === 'en' ? 'P' : 'శా'}:₹{branch.permanentRate} {language === 'en' ? 'C' : 'కా'}:₹{branch.contractRate}/1000
+                                    </Text>
+                                </View>
+                                <Text style={styles.chevron}>›</Text>
+                            </View>
+                            <TouchableOpacity
+                                style={styles.updateButton}
+                                onPress={() => onUpdateRateRequest(branch)}
+                            >
+                                <Text style={styles.updateButtonText}>{t.branches.updateRate}</Text>
+                            </TouchableOpacity>
                         </TouchableOpacity>
-                    </TouchableOpacity>
-                ))}
+                    ))
+                )}
             </ScrollView>
         </View>
     );
@@ -114,6 +118,12 @@ const styles = StyleSheet.create({
     },
     scrollContent: {
         flex: 1,
+    },
+    emptyText: {
+        textAlign: 'center',
+        padding: 32,
+        color: '#6b7280',
+        fontSize: 16,
     },
     branchCard: {
         backgroundColor: '#fff',

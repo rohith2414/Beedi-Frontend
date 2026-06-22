@@ -21,6 +21,8 @@ interface BranchReportSummary {
     totalAaku: number;
     totalThambaku: number;
     totalDharam: number;
+    totalSalary?: number;
+    totalDue?: number;
 }
 
 interface BranchReportResponse {
@@ -58,10 +60,10 @@ class ReportService {
     /**
      * Get daily report for a specific branch
      */
-    async getBranchDailyReport(branchId: string, date: Date): Promise<BranchReportResponse> {
+    async getBranchDailyReport(branchId: string, date: Date, deductDues = true): Promise<BranchReportResponse> {
         try {
             const dateStr = formatDateForAPI(date);
-            const endpoint = API_CONFIG.ENDPOINTS.REPORTS_BRANCH_DAILY(branchId, dateStr);
+            const endpoint = `${API_CONFIG.ENDPOINTS.REPORTS_BRANCH_DAILY(branchId, dateStr)}?deductDues=${deductDues}`;
             const response: any = await apiService.get(endpoint);
 
             if (response.success && response.data) {
@@ -78,9 +80,9 @@ class ReportService {
     /**
      * Get monthly report for a specific branch
      */
-    async getBranchMonthlyReport(branchId: string, year: number, month: number): Promise<BranchReportResponse> {
+    async getBranchMonthlyReport(branchId: string, year: number, month: number, deductDues = true): Promise<BranchReportResponse> {
         try {
-            const endpoint = API_CONFIG.ENDPOINTS.REPORTS_BRANCH_MONTHLY(branchId, year, month);
+            const endpoint = `${API_CONFIG.ENDPOINTS.REPORTS_BRANCH_MONTHLY(branchId, year, month)}?deductDues=${deductDues}`;
             const response: any = await apiService.get(endpoint);
 
             if (response.success && response.data) {
@@ -97,9 +99,9 @@ class ReportService {
     /**
      * Get yearly report for a specific branch
      */
-    async getBranchYearlyReport(branchId: string, year: number): Promise<BranchReportResponse> {
+    async getBranchYearlyReport(branchId: string, year: number, deductDues = true): Promise<BranchReportResponse> {
         try {
-            const endpoint = API_CONFIG.ENDPOINTS.REPORTS_BRANCH_YEARLY(branchId, year);
+            const endpoint = `${API_CONFIG.ENDPOINTS.REPORTS_BRANCH_YEARLY(branchId, year)}?deductDues=${deductDues}`;
             const response: any = await apiService.get(endpoint);
 
             if (response.success && response.data) {
@@ -116,10 +118,10 @@ class ReportService {
     /**
      * Get daily report for ALL branches combined
      */
-    async getAllBranchesDailyReport(date: Date): Promise<{ date: string; summary: BranchReportSummary }> {
+    async getAllBranchesDailyReport(date: Date, deductDues = true): Promise<{ date: string; summary: BranchReportSummary }> {
         try {
             const dateStr = formatDateForAPI(date);
-            const endpoint = API_CONFIG.ENDPOINTS.REPORTS_ALL_BRANCHES_DAILY(dateStr);
+            const endpoint = `${API_CONFIG.ENDPOINTS.REPORTS_ALL_BRANCHES_DAILY(dateStr)}?deductDues=${deductDues}`;
             const response: any = await apiService.get(endpoint);
 
             if (response.success && response.data) {
@@ -136,9 +138,9 @@ class ReportService {
     /**
      * Get monthly report for ALL branches combined
      */
-    async getAllBranchesMonthlyReport(year: number, month: number): Promise<{ period: { year: number; month: number }; summary: BranchReportSummary }> {
+    async getAllBranchesMonthlyReport(year: number, month: number, deductDues = true): Promise<{ period: { year: number; month: number }; summary: BranchReportSummary }> {
         try {
-            const endpoint = API_CONFIG.ENDPOINTS.REPORTS_ALL_BRANCHES_MONTHLY(year, month);
+            const endpoint = `${API_CONFIG.ENDPOINTS.REPORTS_ALL_BRANCHES_MONTHLY(year, month)}?deductDues=${deductDues}`;
             const response: any = await apiService.get(endpoint);
 
             if (response.success && response.data) {
@@ -155,9 +157,9 @@ class ReportService {
     /**
      * Get yearly report for ALL branches combined
      */
-    async getAllBranchesYearlyReport(year: number): Promise<{ period: { year: number }; summary: BranchReportSummary }> {
+    async getAllBranchesYearlyReport(year: number, deductDues = true): Promise<{ period: { year: number }; summary: BranchReportSummary }> {
         try {
-            const endpoint = API_CONFIG.ENDPOINTS.REPORTS_ALL_BRANCHES_YEARLY(year);
+            const endpoint = `${API_CONFIG.ENDPOINTS.REPORTS_ALL_BRANCHES_YEARLY(year)}?deductDues=${deductDues}`;
             const response: any = await apiService.get(endpoint);
 
             if (response.success && response.data) {

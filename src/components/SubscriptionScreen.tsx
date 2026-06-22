@@ -325,13 +325,15 @@ const SubscriptionScreen: React.FC<SubscriptionScreenProps> = ({
 
                 {loading ? (
                     <ActivityIndicator size="large" color="#10b981" style={styles.subscribeLoader} />
-                ) : subscription?.status === 'ACTIVE' ? (
+                ) : (subscription?.status === 'ACTIVE' || subscription?.status === 'TRIAL') ? (
                     <TouchableOpacity 
                         style={[styles.subscribeButton, styles.disabledButton]} 
                         disabled={true}
                     >
                         <Text style={styles.disabledButtonText}>
-                            {language === 'te' ? 'సక్రియంగా ఉంది' : 'Active'}
+                            {subscription?.status === 'ACTIVE'
+                                ? (language === 'te' ? 'సక్రియంగా ఉంది' : 'Active')
+                                : (language === 'te' ? 'ఉచిత ట్రయల్ సక్రియంగా ఉంది' : 'Free Trial Active')}
                         </Text>
                     </TouchableOpacity>
                 ) : (

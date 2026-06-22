@@ -28,6 +28,7 @@ export interface Translations {
         permanentRate: string;
         contractRate: string;
         workersCount: string;
+        noBranchesFound: string;
     };
 
     // Workers
@@ -168,6 +169,7 @@ export const translations: Record<Language, Translations> = {
             permanentRate: 'Permanent Rate',
             contractRate: 'Contract Rate',
             workersCount: 'workers',
+            noBranchesFound: 'No branches found',
         },
         workers: {
             allWorkers: 'All Workers',
@@ -293,6 +295,7 @@ export const translations: Record<Language, Translations> = {
             permanentRate: 'శాశ్వత రేటు',
             contractRate: 'కాంట్రాక్ట్ రేటు',
             workersCount: 'కార్మికులు',
+            noBranchesFound: 'శాఖలు కనుగొనబడలేదు',
         },
         workers: {
             allWorkers: 'అన్ని కార్మికులు',

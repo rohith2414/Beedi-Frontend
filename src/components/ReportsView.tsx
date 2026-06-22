@@ -25,6 +25,8 @@ interface BranchDetailReport {
     aakuSpent: number;
     thamakuSpent: number;
     dharamSpent: number;
+    totalSalary?: number;
+    totalDue?: number;
 }
 
 interface ReportsViewProps {
@@ -40,6 +42,7 @@ const ReportsView: React.FC<ReportsViewProps> = ({ branches, onBack }) => {
     const [loading, setLoading] = useState(true);
     const [branchSummaries, setBranchSummaries] = useState<BranchSummary[]>([]);
     const [detailReport, setDetailReport] = useState<BranchDetailReport | null>(null);
+    const [deductDues, setDeductDues] = useState(true);
 
     // Fetch branch summaries (today's kattalu for each branch)
     useEffect(() => {
@@ -54,7 +57,7 @@ const ReportsView: React.FC<ReportsViewProps> = ({ branches, onBack }) => {
             fetchDetailReport();
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selectedBranch, period, selectedDate]);
+    }, [selectedBranch, period, selectedDate, deductDues]);
 
     const fetchBranchSummaries = async () => {
         try {
@@ -91,11 +94,11 @@ const ReportsView: React.FC<ReportsViewProps> = ({ branches, onBack }) => {
                     let reportData;
 
                     if (period === 'daily') {
-                        reportData = await reportService.getAllBranchesDailyReport(selectedDate);
+                        reportData = await reportService.getAllBranchesDailyReport(selectedDate, deductDues);
                     } else if (period === 'monthly') {
-                        reportData = await reportService.getAllBranchesMonthlyReport(year, month);
+                        reportData = await reportService.getAllBranchesMonthlyReport(year, month, deductDues);
                     } else {
-                        reportData = await reportService.getAllBranchesYearlyReport(year);
+                        reportData = await reportService.getAllBranchesYearlyReport(year, deductDues);
                     }
 
                     setDetailReport({
@@ -103,6 +106,8 @@ const ReportsView: React.FC<ReportsViewProps> = ({ branches, onBack }) => {
                         aakuSpent: reportData.summary.totalAaku,
                         thamakuSpent: reportData.summary.totalThambaku,
                         dharamSpent: reportData.summary.totalDharam,
+                        totalSalary: reportData.summary.totalSalary,
+                        totalDue: reportData.summary.totalDue,
                     });
                 } catch (allBranchesError: any) {
                     // Fallback: If all-branches endpoints don't exist, aggregate client-side
@@ -112,6 +117,8 @@ const ReportsView: React.FC<ReportsViewProps> = ({ branches, onBack }) => {
                     let totalAaku = 0;
                     let totalThambaku = 0;
                     let totalDharam = 0;
+                    let totalSalary = 0;
+                    let totalDue = 0;
 
                     // For daily, use today's summary if available
                     if (period === 'daily') {
@@ -128,15 +135,17 @@ const ReportsView: React.FC<ReportsViewProps> = ({ branches, onBack }) => {
                             try {
                                 let branchReport;
                                 if (period === 'monthly') {
-                                    branchReport = await reportService.getBranchMonthlyReport(branch.id, year, month);
+                                    branchReport = await reportService.getBranchMonthlyReport(branch.id, year, month, deductDues);
                                 } else {
-                                    branchReport = await reportService.getBranchYearlyReport(branch.id, year);
+                                    branchReport = await reportService.getBranchYearlyReport(branch.id, year, deductDues);
                                 }
 
                                 totalKattalu += branchReport.summary.totalKattalu;
                                 totalAaku += branchReport.summary.totalAaku;
                                 totalThambaku += branchReport.summary.totalThambaku;
                                 totalDharam += branchReport.summary.totalDharam;
+                                totalSalary += branchReport.summary.totalSalary || 0;
+                                totalDue += branchReport.summary.totalDue || 0;
                             } catch (err) {
                                 console.error(`Error fetching report for branch ${branch.name}:`, err);
                             }
@@ -148,6 +157,8 @@ const ReportsView: React.FC<ReportsViewProps> = ({ branches, onBack }) => {
                         aakuSpent: totalAaku,
                         thamakuSpent: totalThambaku,
                         dharamSpent: totalDharam,
+                        totalSalary,
+                        totalDue,
                     });
                 }
             } else {
@@ -157,11 +168,11 @@ const ReportsView: React.FC<ReportsViewProps> = ({ branches, onBack }) => {
                 let branchReport;
 
                 if (period === 'daily') {
-                    branchReport = await reportService.getBranchDailyReport(selectedBranch.id, selectedDate);
+                    branchReport = await reportService.getBranchDailyReport(selectedBranch.id, selectedDate, deductDues);
                 } else if (period === 'monthly') {
-                    branchReport = await reportService.getBranchMonthlyReport(selectedBranch.id, year, month);
+                    branchReport = await reportService.getBranchMonthlyReport(selectedBranch.id, year, month, deductDues);
                 } else {
-                    branchReport = await reportService.getBranchYearlyReport(selectedBranch.id, year);
+                    branchReport = await reportService.getBranchYearlyReport(selectedBranch.id, year, deductDues);
                 }
 
                 setDetailReport({
@@ -169,6 +180,8 @@ const ReportsView: React.FC<ReportsViewProps> = ({ branches, onBack }) => {
                     aakuSpent: branchReport.summary.totalAaku,
                     thamakuSpent: branchReport.summary.totalThambaku,
                     dharamSpent: branchReport.summary.totalDharam,
+                    totalSalary: branchReport.summary.totalSalary,
+                    totalDue: branchReport.summary.totalDue,
                 });
             }
         } catch (error: any) {
@@ -179,6 +192,8 @@ const ReportsView: React.FC<ReportsViewProps> = ({ branches, onBack }) => {
                 aakuSpent: 0,
                 thamakuSpent: 0,
                 dharamSpent: 0,
+                totalSalary: 0,
+                totalDue: 0,
             });
         } finally {
             setLoading(false);
@@ -401,6 +416,22 @@ const ReportsView: React.FC<ReportsViewProps> = ({ branches, onBack }) => {
                 </TouchableOpacity>
             </View>
 
+            {/* Dues Deduction Toggle */}
+            <View style={styles.duesToggleContainer}>
+                <TouchableOpacity
+                    style={styles.checkboxContainer}
+                    onPress={() => setDeductDues(!deductDues)}
+                    activeOpacity={0.8}
+                >
+                    <View style={[styles.checkbox, deductDues && styles.checkboxChecked]}>
+                        {deductDues && <Text style={styles.checkmark}>✓</Text>}
+                    </View>
+                    <Text style={styles.checkboxLabel}>
+                        {language === 'en' ? 'Deduct Dues from Salary' : 'జీతం నుండి బకాయిలను తీసివేయండి'}
+                    </Text>
+                </TouchableOpacity>
+            </View>
+
             {/* Metrics */}
             <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
                 {loading ? (
@@ -428,6 +459,17 @@ const ReportsView: React.FC<ReportsViewProps> = ({ branches, onBack }) => {
                             </Text>
                             <Text style={styles.metricValue}>
                                 {formatNumber(detailReport.totalKattalu)}
+                            </Text>
+                        </View>
+
+                        {/* Amount to Pay */}
+                        <View style={[styles.metricCard, styles.salaryCard]}>
+                            <Text style={styles.metricIcon}>💰</Text>
+                            <Text style={styles.metricLabel}>
+                                {language === 'en' ? 'Amount to Pay' : 'చెల్లించాల్సిన మొత్తం'}
+                            </Text>
+                            <Text style={styles.metricValue}>
+                                ₹{formatNumber(detailReport.totalSalary || 0)}
                             </Text>
                         </View>
 
@@ -773,6 +815,10 @@ const styles = StyleSheet.create({
         backgroundColor: '#fce7f3',
         borderLeftColor: '#ec4899',
     },
+    salaryCard: {
+        backgroundColor: '#e0e7ff',
+        borderLeftColor: '#6366f1',
+    },
     metricIcon: {
         fontSize: 32,
         marginBottom: 12,
@@ -787,6 +833,40 @@ const styles = StyleSheet.create({
         fontSize: 36,
         fontWeight: 'bold',
         color: '#1f2937',
+    },
+    duesToggleContainer: {
+        backgroundColor: '#fff',
+        paddingHorizontal: 20,
+        paddingVertical: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: '#e5e7eb',
+    },
+    checkboxContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    checkbox: {
+        width: 22,
+        height: 22,
+        borderWidth: 2,
+        borderColor: '#10b981',
+        borderRadius: 6,
+        marginRight: 10,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    checkboxChecked: {
+        backgroundColor: '#10b981',
+    },
+    checkmark: {
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 14,
+    },
+    checkboxLabel: {
+        color: '#374151',
+        fontSize: 16,
+        fontWeight: '600',
     },
 });
 

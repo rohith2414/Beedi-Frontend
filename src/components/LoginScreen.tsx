@@ -149,10 +149,10 @@ const LoginScreen: React.FC = () => {
         try {
             setLoading(true);
             await authService.forgotPassword(email);
-            
+
             Alert.alert(
                 language === 'en' ? 'Verification Code Sent' : 'ధృవీకరణ కోడ్ పంపబడింది',
-                language === 'en' 
+                language === 'en'
                     ? 'A 6-digit verification code has been sent to your email address.'
                     : 'మీ ఈమెయిల్ చిరునామాకు 6 అంకెల ధృవీకరణ కోడ్ పంపబడింది.',
                 [
@@ -281,10 +281,10 @@ const LoginScreen: React.FC = () => {
                     mode === 'login'
                         ? (language === 'en' ? 'Logging in...' : 'లాగిన్ అవుతోంది...')
                         : mode === 'register'
-                        ? (language === 'en' ? 'Creating account...' : 'ఖాతా సృష్టించబడుతోంది...')
-                        : mode === 'forgot_password'
-                        ? (language === 'en' ? 'Sending reset link...' : 'రీసెట్ కోడ్ పంపబడుతోంది...')
-                        : (language === 'en' ? 'Resetting password...' : 'పాస్‌వర్డ్ రీసెట్ చేయబడుతోంది...')
+                            ? (language === 'en' ? 'Creating account...' : 'ఖాతా సృష్టించబడుతోంది...')
+                            : mode === 'forgot_password'
+                                ? (language === 'en' ? 'Sending reset link...' : 'రీసెట్ కోడ్ పంపబడుతోంది...')
+                                : (language === 'en' ? 'Resetting password...' : 'పాస్‌వర్డ్ రీసెట్ చేయబడుతోంది...')
                 }
             />
         );
@@ -324,10 +324,10 @@ const LoginScreen: React.FC = () => {
                         {mode === 'login'
                             ? (language === 'en' ? 'Welcome back!' : 'మళ్లీ స్వాగతం!')
                             : mode === 'register'
-                            ? (language === 'en' ? 'Create your account' : 'మీ ఖాతాను సృష్టించండి')
-                            : mode === 'forgot_password'
-                            ? (language === 'en' ? 'Reset your password' : 'మీ పాస్‌వర్డ్‌ను రీసెట్ చేయండి')
-                            : (language === 'en' ? 'Enter Verification Code' : 'ధృవీకరణ కోడ్ నమోదు చేయండి')}
+                                ? (language === 'en' ? 'Create your account' : 'మీ ఖాతాను సృష్టించండి')
+                                : mode === 'forgot_password'
+                                    ? (language === 'en' ? 'Reset your password' : 'మీ పాస్‌వర్డ్‌ను రీసెట్ చేయండి')
+                                    : (language === 'en' ? 'Enter Verification Code' : 'ధృవీకరణ కోడ్ నమోదు చేయండి')}
                     </Text>
                 </View>
 
@@ -369,7 +369,7 @@ const LoginScreen: React.FC = () => {
                     {mode === 'register' && (
                         <View style={styles.inputGroup}>
                             <Text style={styles.label}>
-                                {language === 'en' ? 'Phone (Optional)' : 'ఫోన్ నంబర్ (ఐచ్ఛికం)'}
+                                {language === 'en' ? 'Phone' : 'ఫోన్ నంబర్'}
                             </Text>
                             <TextInput
                                 style={styles.input}
@@ -421,7 +421,7 @@ const LoginScreen: React.FC = () => {
                                         autoCapitalize="none"
                                         editable={!loading}
                                     />
-                                    <TouchableOpacity 
+                                    <TouchableOpacity
                                         style={styles.eyeButton}
                                         onPress={() => setShowPassword(!showPassword)}
                                         activeOpacity={0.7}
@@ -459,7 +459,7 @@ const LoginScreen: React.FC = () => {
                                             autoCapitalize="none"
                                             editable={!loading}
                                         />
-                                        <TouchableOpacity 
+                                        <TouchableOpacity
                                             style={styles.eyeButton}
                                             onPress={() => setShowPassword(!showPassword)}
                                             activeOpacity={0.7}
@@ -497,10 +497,10 @@ const LoginScreen: React.FC = () => {
                             {mode === 'login'
                                 ? (language === 'en' ? 'Login' : 'లాగిన్')
                                 : mode === 'register'
-                                ? (language === 'en' ? 'Register' : 'నమోదు చేయండి')
-                                : mode === 'forgot_password'
-                                ? (language === 'en' ? 'Send Code' : 'కోడ్ పంపండి')
-                                : (language === 'en' ? 'Reset Password' : 'పాస్‌వర్డ్‌ను రీసెట్ చేయండి')}
+                                    ? (language === 'en' ? 'Register' : 'నమోదు చేయండి')
+                                    : mode === 'forgot_password'
+                                        ? (language === 'en' ? 'Send Code' : 'కోడ్ పంపండి')
+                                        : (language === 'en' ? 'Reset Password' : 'పాస్‌వర్డ్‌ను రీసెట్ చేయండి')}
                         </Text>
                     </TouchableOpacity>
 
